@@ -57,10 +57,10 @@ git status
 git fetch origin
 ```
 
-- developブランチに移動してdevelopブランチに特定のブランチをマージ
+- feature/loginブランチに移動してfeature/loginブランチに特定のブランチをマージ
 ```
-git switch develop
-git merge feature/login
+git switch feature/login
+git merge origin/feature/login
 ```
 
 - マージ中に競合が発生した場合、コンフリクトを解消する
@@ -72,44 +72,58 @@ git add <解消したファイル>
 git commit
 ```
 
+- ファイルをステージングしてからコミットする
+```
+git add .
+git commit -m "適切なコメント"
+```
+
 - リモートにpush
 ```
-git push origin develop
+git push origin feature/login
 ```
+
+- GitHubでプルリクエスト作成
+feature/loginブランチからdevelopブランチに対して
+
+- プルリクがクローズ
+GithubのUIにある「Merge pull request」ボタンをクリック
+feature/loginブランチをdevelopブランチにマージ
 
 - 疎通確認
-  - developブランチの動作が問題ないかを確認
-
-- 問題がなければmainブランチを最新に更新
+リモートのdevelopブランチをローカルに取り込み動作を確認する
 ```
+git fetch origin
+git switch develop
+git merge origin/develop
+＃ その後動作確認
+```　
+
+- 問題がなければリモートのdevelopブランチからリモートのmainブランチに対してプルリクを発行
+
+- プルリクが閉じられたらリモートのdevelopブランチをリモートのmainブランチにマージ
+
+- mainブランチを最新に更新
+```
+git fetch origin
 git switch main
-git pull origin main
-```
-
-- developブランチをmainブランチにマージ
-```
-git merge develop
-```
-
-- mainブランチをリモートにプッシュ
-```
-git push origin main
+git merge origin/main
 ```
 
 # 4. プルリク手順
 
 ## 1. 変更内容を確認
-- 変更内容をステージングする前に、現在の状態を確認します。
+- 変更内容をステージングする前に、現在の状態を確認。
 ```
 git status
 ```
 
 ## 2. 変更をステージングする
-- 変更したファイルをステージング（次回のコミットに含める準備）します。
+- 変更したファイルをステージング（次回のコミットに含める準備）する。
 ```
 git add <ファイル名>
-すべての変更を一括でステージングする場合は：
 
+すべての変更を一括でステージングする場合は：
 git add .
 ```
 
@@ -120,12 +134,10 @@ git commit -m "変更内容を簡潔に説明するコメント"
 ```
 
 ## 4. リモートリポジトリにプッシュする
-- 現在のブランチをリモートリポジトリに送信します。プッシュ前にブランチを作成していない場合、作成してください。
+- 
 ```
-git switch <新しいブランチ名>
+git switch feature/login
+git push origin feature/login
 ```
 
-- 変更をリモートにプッシュ
-```
-git push origin <新しいブランチ名>
-```
+## 5. feature/loginブランチからdevelopブランチに対してプルリクを発行する 
