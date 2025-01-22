@@ -35,7 +35,7 @@
 
 ---
 
-# 3. developブランチへのマージ手順及びリモートへの反映手順
+# 3.コンフリクト解消手順
 
 - developブランチにいないことを確認
 ```
@@ -47,30 +47,30 @@ git branch
   main
 ```
 
-- 未コミットのファイルが無いかを確認
-```
-git status
-```
-
 - リモートの最新状態を取得
 ```
-git fetch origin
+git fetch origin feature/login
 ```
 
-- feature/loginブランチに移動してfeature/loginブランチに特定のブランチをマージ
+- feature/loginブランチに特定のブランチをマージ
 ```
-git switch feature/login
 git merge origin/feature/login
 ```
 
 - マージ中に競合が発生した場合、コンフリクトを解消する
 ```
 git status  # 競合しているファイルを確認
-# vscodeを用いて競合を解消
 git add <解消したファイル>
 # 全てのコンフリクトを解消したら
-git commit
+git commit -m "適切なコメント"
 ```
+
+- マージが解消されているかを確認する
+```
+git status
+```
+
+# 4 プルリク手順
 
 - ファイルをステージングしてからコミットする
 ```
@@ -109,35 +109,3 @@ git fetch origin
 git switch main
 git merge origin/main
 ```
-
-# 4. プルリク手順
-
-## 1. 変更内容を確認
-- 変更内容をステージングする前に、現在の状態を確認。
-```
-git status
-```
-
-## 2. 変更をステージングする
-- 変更したファイルをステージング（次回のコミットに含める準備）する。
-```
-git add <ファイル名>
-
-すべての変更を一括でステージングする場合は：
-git add .
-```
-
-## 3. 変更をコミットする
-- 変更内容をローカルリポジトリに保存します。
-```
-git commit -m "変更内容を簡潔に説明するコメント"
-```
-
-## 4. リモートリポジトリにプッシュする
-- 
-```
-git switch feature/login
-git push origin feature/login
-```
-
-## 5. feature/loginブランチからdevelopブランチに対してプルリクを発行する 
