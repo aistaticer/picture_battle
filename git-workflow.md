@@ -47,6 +47,11 @@ git branch
   main
 ```
 
+- 変更ファイルが全てコミットされているかを確認
+```
+git status
+```
+
 - リモートの最新状態を取得
 ```
 git fetch origin feature/login
@@ -57,16 +62,14 @@ git fetch origin feature/login
 git merge origin/feature/login
 ```
 
-- マージ中に競合が発生した場合、コンフリクトを解消する
+- マージ中に競合が発生した場合、コンフリクトを解消する。解消されていればマージする
 ```
 git status  # 競合しているファイルを確認
 git add <解消したファイル>
 # 全てのコンフリクトを解消したら
 git commit -m "適切なコメント"
-```
-
-- マージが解消されているかを確認する
-```
+git merge origin/feature/login
+コンフリクトが解消されているかを確認
 git status
 ```
 
@@ -97,7 +100,7 @@ git fetch origin
 git switch develop
 git merge origin/develop
 ＃ その後動作確認
-```　
+```
 
 - 問題がなければリモートのdevelopブランチからリモートのmainブランチに対してプルリクを発行
 
