@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    volumes:
+      - ./app/src:/app/src  # コードをコンテナ内にマウント
+      - ./app/target:/app/target  # コンパイル済みクラスをマウント（ホットリロード用）
+      - ~/.m2:/root/.m2      # Maven の依存関係をキャッシュしてビルドを高速化    
+    container_name: cnt-picture_battle-app
+    restart: on-failure:5
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    networks:
+      - picture_battle-network
+    command: mvn spring-boot:run  # コンテナ起動時に開発モードで実行
+
+  db:
+    image: postgres:15
+    container_name: cnt-picture_battle-db
+    restart: on-failure:5
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - picture_battle-network
+
+volumes:
+  postgres-data:
+
+networks:
+  picture_battle-network:
+    driver: bridge
