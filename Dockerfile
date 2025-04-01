@@ -1,16 +1,18 @@
-# 開発環境　Dockefile
+# 開発環境用 Dockerfile
 
-# ベースイメージとしてAdoptOpenJDKを使用
 FROM openjdk:17-jdk-slim
 
 # Mavenをインストール
-RUN apt-get update && apt-get install -y maven
+RUN apt-get update && apt-get install -y maven curl
 
 # 作業ディレクトリを /app に設定
 WORKDIR /app
 
-# プロジェクトのpom.xmlとソースコードをコピー
+# 依存関係をキャッシュするためにpom.xmlだけ先にコピー
 COPY app/pom.xml ./
+
+# 依存関係をインストール（オフラインモードの準備）
+RUN mvn dependency:go-offline
 
 # ソースコードをコピー
 COPY app/src ./src

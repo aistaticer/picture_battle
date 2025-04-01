@@ -45,3 +45,4 @@ volumes:
 networks:
   picture_battle-network:
     driver: bridge
+    name: picture_battle-network
