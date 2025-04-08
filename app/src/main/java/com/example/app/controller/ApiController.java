@@ -1,6 +1,8 @@
 package com.example.app.controller;
 
 import com.example.app.util.RSAKeyGenerator;
+import com.example.app.service.QuizService;
+import com.example.app.dto.sendThemeResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.Random;
 public class ApiController {
 
     RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator();
+    QuizService quizService = new QuizService();
 
     @PostMapping("/data")
     public ResponseEntity<Map<String, String>> receiveData(@RequestBody Map<String, String> payload) {
@@ -38,6 +41,21 @@ public class ApiController {
     }
 
     /**
+     * お題を作成してクライアントに返す
+     * @return　日本語のお題
+     * @throws Exception
+     */
+    @GetMapping("/theme")
+    public ResponseEntity<sendThemeResponse> submitTheme() throws Exception {
+
+        sendThemeResponse response = new sendThemeResponse(
+            quizService.generateQuestion()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+
+    /**
      * 作成された秘密鍵をクライアントに返す
      * ※ 開発・デバッグ目的。秘密鍵をクライアントなどに渡すのはセキュリティ上危険。
      *
@@ -48,5 +66,7 @@ public class ApiController {
     public String ex() throws Exception{
         return rsaKeyGenerator.exString();
     }
+
+    
 }
 
