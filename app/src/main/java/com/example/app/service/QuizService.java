@@ -11,6 +11,7 @@ import java.util.Random;
 public class QuizService {
 
 	FileOperations fileOperations = new FileOperations();
+	
 	/**
 	 * themes.json ファイルのお題をコントローラに渡す。
 	 * 

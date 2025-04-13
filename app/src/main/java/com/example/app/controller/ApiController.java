@@ -2,7 +2,10 @@ package com.example.app.controller;
 
 import com.example.app.util.RSAKeyGenerator;
 import com.example.app.service.QuizService;
+import com.example.app.dto.CheckAnswerRequest;
 import com.example.app.dto.sendThemeResponse;
+import com.example.app.dto.CheckAnswerRequest;
+import com.example.app.dto.Reward;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,12 +19,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Random;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:3001")
+@CrossOrigin(
+  origins = "http://localhost:3001",
+  methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS},
+  allowedHeaders = "*"
+)
 public class ApiController {
 
     RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator();
@@ -54,6 +62,19 @@ public class ApiController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/checkAnswer")
+    public ResponseEntity<Reward> checkAnswer(@RequestBody CheckAnswerRequest request) throws Exception {
+
+        String answer = request.getAnswer();
+
+        int reward = answer.length();
+
+        Reward response = new Reward(reward);
+
+        System.out.println(answer+"fecthされた"+response.getReward());
+
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * 作成された秘密鍵をクライアントに返す
