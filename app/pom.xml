@@ -50,6 +50,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!--websocketのため-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
 		<!--コード変更即時反映のため-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -1,7 +1,9 @@
 package com.example.app.controller;
 
 import com.example.app.util.RSAKeyGenerator;
+import com.example.app.service.GameService;
 import com.example.app.service.QuizService;
+import com.example.app.dto.BoardState;
 import com.example.app.dto.CheckAnswerRequest;
 import com.example.app.dto.sendThemeResponse;
 import com.example.app.dto.CheckAnswerRequest;
@@ -21,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.example.app.dto.Board;
+import com.example.app.dto.Tile;
+
 import java.util.Random;
 
 @RestController
@@ -34,6 +39,7 @@ public class ApiController {
 
     RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator();
     QuizService quizService = new QuizService();
+    GameService gameService = new GameService();
 
     @PostMapping("/data")
     public ResponseEntity<Map<String, String>> receiveData(@RequestBody Map<String, String> payload) {
@@ -76,6 +82,31 @@ public class ApiController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 更新されたデータを受け取り、盤面の状態を更新
+     * @return　日本語のお題
+     * @throws Exception
+     */
+    //@PostMapping("/api/board")
+    //public ResponseEntity<BoardState> receiveBoardState(@RequestBody BoardState boardState) {
+    //    System.out.println(boardState);
+    //    return ResponseEntity.ok().build();
+    //}
+
+    /**
+     * 作成された秘密鍵をクライアントに返す
+     * ※ 開発・デバッグ目的。秘密鍵をクライアントなどに渡すのはセキュリティ上危険。
+     *
+     * @return Base64エンコードされた秘密鍵の文字列
+     * @throws Exception 鍵生成時のエラー
+     */
+    @GetMapping("/board/init")
+    public ResponseEntity<Board> getFirstBoard() throws Exception{
+        Board board = gameService.getInitialBoard(4);
+        return ResponseEntity.ok(board);
+    }
+
+        
     /**
      * 作成された秘密鍵をクライアントに返す
      * ※ 開発・デバッグ目的。秘密鍵をクライアントなどに渡すのはセキュリティ上危険。
