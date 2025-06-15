@@ -20,10 +20,10 @@ public class WebSocketDispatcher {
 			}
     }
 
-    public void dispatch(String type, WebSocketSession session, JsonNode data) throws Exception {
+    public void dispatch(String type, WebSocketSession session, JsonNode actionType, JsonNode payload) throws Exception {
 			WebSocketCommandHandler handler = handlerMap.get(type);
 			if (handler != null) {
-				handler.handle(session, data);
+				handler.handle(session, actionType,payload);
 			} else {
 				session.sendMessage(new TextMessage("{\"error\": \"Unknown command\"}"));
 			}

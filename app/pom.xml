@@ -50,6 +50,24 @@
 			<scope>test</scope>
 		</dependency>
 
+	  <!-- Redis操作ライブラリ（Spring Data Redis） -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- JSONシリアライズ用（オブジェクト→文字列） -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<!-- Redis接続クライアント：Lettuce（spring-boot-starter-data-redis に含まれているが、明示的に指定してもOK） -->
+		<dependency>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+		</dependency>
+
 		<!--websocketのため-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

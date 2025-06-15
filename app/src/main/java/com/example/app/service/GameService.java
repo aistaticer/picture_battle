@@ -3,25 +3,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.example.app.dto.Board;
-import com.example.app.dto.Tile;
+import com.example.app.dto.BoardDTO;
+import com.example.app.dto.TileDTO;
 
 public class GameService {
-	public Board getInitialBoard(int size) {
-		List<List<Tile>> tiles = new ArrayList<>();
+	public BoardDTO getInitialBoard(int size) {
+		List<List<TileDTO>> tiles = new ArrayList<>();
 
 		int width = size;
 		int height = size;
 		int y = 0;
 
 		for (int z = 0; z < height; z++) {
-			List<Tile> row = new ArrayList<>();
+			List<TileDTO> row = new ArrayList<>();
 			for (int x = 0; x < width; x++) {
-				row.add(new Tile("empty", Arrays.asList(x, y, z)));
+				row.add(new TileDTO("empty", Arrays.asList(x, y, z)));
 			}
 			tiles.add(row);
 		}
 
-		return new Board(tiles);
+		return new BoardDTO(tiles);
 	}
 }

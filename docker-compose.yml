@@ -39,6 +39,14 @@ services:
     networks:
       - picture_battle-network
 
+  redis:
+    image: redis:7
+    container_name: cnt-picture_battle-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - picture_battle-network
+
 volumes:
   postgres-data:
 

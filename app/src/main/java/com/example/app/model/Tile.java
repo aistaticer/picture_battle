@@ -1,13 +1,14 @@
-package com.example.app.dto;
+package com.example.app.model;
+
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Board {
-	private List<List<Tile>> tiles;
+public class Tile {
+  private String type;
+  private List<Integer> position;
 }

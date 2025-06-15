@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.example.app.dto.Board;
-import com.example.app.dto.Tile;
+import com.example.app.dto.BoardDTO;
+import com.example.app.dto.TileDTO;
 
 import java.util.Random;
 
@@ -101,8 +101,8 @@ public class ApiController {
      * @throws Exception 鍵生成時のエラー
      */
     @GetMapping("/board/init")
-    public ResponseEntity<Board> getFirstBoard() throws Exception{
-        Board board = gameService.getInitialBoard(4);
+    public ResponseEntity<BoardDTO> getFirstBoard() throws Exception{
+        BoardDTO board = gameService.getInitialBoard(4);
         return ResponseEntity.ok(board);
     }
 
