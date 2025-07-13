@@ -100,11 +100,11 @@ public class ApiController {
      * @return Base64エンコードされた秘密鍵の文字列
      * @throws Exception 鍵生成時のエラー
      */
-    @GetMapping("/board/init")
+    /*@GetMapping("/board/init")
     public ResponseEntity<BoardDTO> getFirstBoard() throws Exception{
         BoardDTO board = gameService.getInitialBoard(4);
         return ResponseEntity.ok(board);
-    }
+    }*/
 
         
     /**

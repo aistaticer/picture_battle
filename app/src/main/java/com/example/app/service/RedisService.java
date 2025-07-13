@@ -23,12 +23,13 @@ public class RedisService {
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
-	public void save(String gameId, Board board) {
-    redisTemplate.opsForValue().set(gameId, board, Duration.ofMinutes(60));
+	
+	public void save(String boarId, Board board) {
+    redisTemplate.opsForValue().set(boarId, board, Duration.ofMinutes(60));
 	}
 
-	public Optional<Board> get(String gameId) {
-		Object obj = redisTemplate.opsForValue().get(gameId);
+	public Optional<Board> get(String boardId) {
+		Object obj = redisTemplate.opsForValue().get(boardId);
 		if (obj instanceof Board board) {
 			return Optional.of(board);
 		} else {

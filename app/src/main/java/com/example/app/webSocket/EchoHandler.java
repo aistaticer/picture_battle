@@ -6,30 +6,61 @@ import com.example.app.dto.BoardDTO;
 import com.example.app.dto.TileDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.app.webSocket.WebSocketBroadcaster;
 
 public class EchoHandler extends TextWebSocketHandler {
 
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final WebSocketDispatcher dispatcher;
+    private final WebSocketBroadcaster broadcaster;
 
-	public EchoHandler(WebSocketDispatcher dispatcher) {
+	public EchoHandler(WebSocketDispatcher dispatcher, WebSocketBroadcaster broadcaster){
 		this.dispatcher = dispatcher;
+        this.broadcaster = broadcaster;
 	}
 
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        System.out.println("WebSocket接続が確立されました: " + session.getId());
+
+        broadcaster.registerSession(session);
+
+        broadcaster.printAllSessions();
+
+        // 🔍 現在の全セッションを表示
+        System.out.println("現在のセッション一覧:");
+        for (WebSocketSession s : broadcaster.getSessions()) {
+            System.out.println(" - sessionId: " + s.getId() + ", IP: " + s.getRemoteAddress());
+        }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        System.out.println("切断されたセッション: " + session.getId());
+        broadcaster.removeSession(session);
+    }
+
 	@Override
-public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-    // クライアントから受信した WebSocket メッセージ（JSON形式）を Jackson の JsonNode にパースする
-    JsonNode root = mapper.readTree(message.getPayload());
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 
-    // メッセージ内の "type" フィールドを取得して、どの処理をすべきか判断する
-    String type = root.get("type").asText();
+        try{
+            System.err.println("内容確認: "+message.getPayload());
 
-    // メッセージ内の "data" フィールドを取得（処理対象のデータ）
-    JsonNode actionType = root.get("action");
+            // クライアントから受信した WebSocket メッセージ（JSON形式）を Jackson の JsonNode にパースする
+            JsonNode root = mapper.readTree(message.getPayload());
 
-    JsonNode payload = root.get("payload");
+            // メッセージ内の "type" フィールドを取得して、どの処理をすべきか判断する
+            String type = root.get("type").asText();
 
-    // type に応じたコマンドハンドラに処理を委譲する
-    dispatcher.dispatch(type, session, actionType, payload);
-}
+            // メッセージ内の "data" フィールドを取得（処理対象のデータ）
+            JsonNode actionType = root.get("action");
+
+            JsonNode payload = root.get("payload");
+
+            // type に応じたコマンドハンドラに処理を委譲する
+            dispatcher.dispatch(type, session, actionType, payload);
+        }catch(Exception e){
+            System.err.println("例外発生:内容確認: "+message.getPayload());
+            System.err.println("Jacksonエラー: " + e.getMessage());
+        }
+    }
 }

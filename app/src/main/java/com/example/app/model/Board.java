@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @RedisHash("board") 
 public class Board {
-	//@Id
+	private String boardId;
 	private List<List<Tile>> tiles;
 }
