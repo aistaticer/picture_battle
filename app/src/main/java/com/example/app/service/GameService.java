@@ -7,7 +7,8 @@ import com.example.app.dto.BoardDTO;
 import com.example.app.dto.TileDTO;
 
 public class GameService {
-	/*public BoardDTO getInitialBoard(int size) {
+	public BoardDTO getInitialBoard(int size) {
+	
 		List<List<TileDTO>> tiles = new ArrayList<>();
 
 		int width = size;
@@ -22,6 +23,6 @@ public class GameService {
 			tiles.add(row);
 		}
 
-		return new BoardDTO(tiles);
-	}*/
+		return new BoardDTO("1",tiles);
+	}
 }

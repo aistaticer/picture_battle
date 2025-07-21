@@ -8,6 +8,7 @@ import com.example.app.webSocket.EchoHandler;
 import com.example.app.webSocket.WebSocketBroadcaster;
 import com.example.app.webSocket.WebSocketDispatcher;
 import com.example.app.webSocket.WebSocketBroadcaster;
+import com.example.app.webSocket.WebsocketHandshakeInterceptor;
 
 import org.slf4j.Logger;
 
@@ -26,7 +27,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new EchoHandler(dispatcher,broadcaster), "/ws")
-                .setAllowedOrigins("*");
+            .addInterceptors(new WebsocketHandshakeInterceptor())
+            .setAllowedOrigins("*");
 
     }
 }

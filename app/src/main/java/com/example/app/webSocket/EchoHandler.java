@@ -21,16 +21,11 @@ public class EchoHandler extends TextWebSocketHandler {
 
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         System.out.println("WebSocket接続が確立されました: " + session.getId());
-
-        broadcaster.registerSession(session);
-
-        broadcaster.printAllSessions();
-
         // 🔍 現在の全セッションを表示
-        System.out.println("現在のセッション一覧:");
-        for (WebSocketSession s : broadcaster.getSessions()) {
+        //System.out.println("現在のセッション一覧:");
+        /*for (WebSocketSession s : broadcaster.getSessions()) {
             System.out.println(" - sessionId: " + s.getId() + ", IP: " + s.getRemoteAddress());
-        }
+        }*/
     }
 
     @Override
@@ -43,7 +38,7 @@ public class EchoHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 
         try{
-            System.err.println("内容確認: "+message.getPayload());
+            //System.err.println("内容確認: "+message.getPayload());
 
             // クライアントから受信した WebSocket メッセージ（JSON形式）を Jackson の JsonNode にパースする
             JsonNode root = mapper.readTree(message.getPayload());

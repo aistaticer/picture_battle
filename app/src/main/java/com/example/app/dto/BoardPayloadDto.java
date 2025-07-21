@@ -10,5 +10,6 @@ import com.example.app.model.Board;
 @NoArgsConstructor
 public class BoardPayloadDto {
 	private String roomId;
+	private String senderId;
 	private BoardDTO board;	
 }

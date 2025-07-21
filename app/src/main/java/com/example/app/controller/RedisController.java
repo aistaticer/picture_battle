@@ -26,10 +26,10 @@ public class RedisController {
 			return "Saved!";
 	}
 
-	@GetMapping("/get")
+	/*@GetMapping("/get")
 	public Board getBoard(@RequestParam String userId) {
 			System.out.println("get起動");
 			Optional<Board> result = redisService.get(userId);
 			return result.orElse(null); // なければ null を返す（本番なら 404 エラーハンドリングが望ましい）
-	}
+	}*/
 }
