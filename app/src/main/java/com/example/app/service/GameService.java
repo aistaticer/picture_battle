@@ -1,28 +1,33 @@
 package com.example.app.service;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.*;
 
-import com.example.app.dto.BoardDTO;
-import com.example.app.dto.TileDTO;
+import com.example.app.model.Board;
+import com.example.app.model.Tile;
+import com.example.app.model.Tile;
 
 public class GameService {
-	public BoardDTO getInitialBoard(int size) {
-	
-		List<List<TileDTO>> tiles = new ArrayList<>();
+	public Board getInitialBoard(int size) {
 
 		int width = size;
 		int height = size;
 		int y = 0;
+		Map<String, Tile> tileMap = new HashMap<>();
 
 		for (int z = 0; z < height; z++) {
-			List<TileDTO> row = new ArrayList<>();
 			for (int x = 0; x < width; x++) {
-				row.add(new TileDTO("empty", Arrays.asList(x, y, z)));
+				Tile tile = new Tile();
+				tile.setPosition(Arrays.asList(x, y, z));
+				tile.setType("empty"); // 必要に応じて初期タイプなど設定
+
+				String key = x + "-" + y + "-" + z;
+				tileMap.put(key, tile);
 			}
-			tiles.add(row);
+
 		}
 
-		return new BoardDTO("1",tiles);
+		return new Board("1",tileMap);
 	}
 }

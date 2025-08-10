@@ -10,8 +10,10 @@ import com.example.app.dto.sendThemeResponse;
 import com.example.app.dto.CheckAnswerRequest;
 import com.example.app.dto.Reward;
 import com.example.app.service.RedisService;
+import com.example.app.service.UserService;
 import com.example.app.mapper.BoardMapper;
 import com.example.app.model.Board;
+import com.example.app.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,12 +47,16 @@ public class ApiController {
     RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator();
     QuizService quizService = new QuizService();
     GameService gameService = new GameService();
+    
     private final RedisService redisService;
     private final WebSocketBroadcaster webSocketBroadcaster;
+    private final UserService userService;
 
-    public ApiController(RedisService redisService,WebSocketBroadcaster webSocketBroadcaster) {
+
+    public ApiController(RedisService redisService,WebSocketBroadcaster webSocketBroadcaster, UserService userService) {
         this.redisService = redisService;
         this.webSocketBroadcaster = webSocketBroadcaster;
+        this.userService = userService;
     }
 
     @PostMapping("/data")
@@ -102,18 +108,35 @@ public class ApiController {
     @PostMapping("/startGame")
     public ResponseEntity<Map<String, String>> startGame(@RequestBody Map<String, String> body) {
 
-        String token = body.get("token");
+        /*String token = body.get("token");
         String roomId = "1";//UUID.randomUUID().toString(); // 仮に新規ルーム生成
 
         Board board = BoardMapper.toBoard(gameService.getInitialBoard(3));
 
-        System.err.println(board);
+        redisService.save("1",board);*/
 
-        redisService.save("1",board);
+        // ここから確認よう
+
+        String roomId = "1";//UUID.randomUUID().toString(); // 仮に新規ルーム生成
+
+        Board board = gameService.getInitialBoard(5);
+
+        redisService.saveBoard("board1",board);
+
+        redisService.getBoard("board1");
+
+        System.err.println(redisService.getBoard("board1"));
+
+        // ここまで
+
         // ここでルームへの参加処理を行う（セッション保存など）
 
         //webSocketBroadcaster.broadcastToRoom("1","データ送ります");
         webSocketBroadcaster.printAllSessions();
+
+        // DBに仮登録したroom_idを使用　いつか変える
+        UUID room_Id = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        userService.registerUser(room_Id,"taro");
 
         return ResponseEntity.ok(Map.of("roomId", roomId));
     }

@@ -3,12 +3,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardDTO {
 	private String boardId;
-	private List<List<TileDTO>> tiles;
+	//private List<List<TileDTO>> tiles;
+	Map<String,TileDTO> tiles;
 }

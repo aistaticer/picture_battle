@@ -19,7 +19,9 @@ import com.example.app.dto.BoardPayloadDto;
 import com.example.app.dto.BoardResponseDTO;
 import com.example.app.dto.TileDTO;
 import com.example.app.mapper.BoardMapper;
+import com.example.app.mapper.TileMapper;
 import com.example.app.dto.BoardDTO;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -33,14 +35,16 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
     private final RedisService redisService;
     private final ObjectMapper objectMapper;
     private final WebSocketBroadcaster broadcaster;
+	private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * RedisとObjectMapperを使ってBoardの保存や取得を行う。
      */
-    public BoardCommandHandler(RedisService redisService, ObjectMapper objectMapper, WebSocketBroadcaster broadcaster) {
+    public BoardCommandHandler(RedisService redisService, ObjectMapper objectMapper, WebSocketBroadcaster broadcaster, RedisTemplate<String, Object> redisTemplate) {
         this.redisService = redisService;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
+		this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -63,26 +67,39 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
         String actionTypeStr = actionType.asText();
 
         switch (actionTypeStr) {
-            case "save" -> handleSave(session, payload);
-            case "get" -> handleGet(session, payload);
+            //case "save" -> handleSave(session, payload);
+            //case "get" -> handleGet(session, payload);
             case "updateTile" -> handleupdateTile(session, payload);
         }
     }
 
-        /**
+    /**
      * redisに送られてきたtileを同一ルームのユーザー等に送り、boardに再進化してredisに保存。
      * @param session WebSocketセッション
      * @param payload リクエスト本体（boardId,boardの中身）
      */
     private void handleupdateTile(WebSocketSession session, JsonNode payload) throws Exception {
+        System.err.println("updateTile");
+        System.err.println(payload);
         String roomId = payload.get("roomId").asText();
         String senderId = payload.get("senderId").asText();
+        String boardId = payload.get("boardId").asText();
+
+        System.err.println(redisService.getBoard(boardId));
 
         JsonNode updateTileNode = payload.get("updateTile");
-
         TileDTO tileDTO = objectMapper.treeToValue(updateTileNode, TileDTO.class);
 
-        broadcaster.broadcastToRoom(roomId,senderId,tileDTO);
+        System.err.println("payload");
+        System.err.println(payload);
+
+        try {
+            redisService.updateTile(boardId, tileDTO);
+            redisTemplate.convertAndSend("board-updates", payload.toString());  
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //broadcaster.broadcastToRoom(roomId,senderId,boardMap);
     }
 
     /**
@@ -90,7 +107,7 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
      * @param session WebSocketセッション
      * @param payload リクエスト本体（boardId,boardの中身）
      */
-    private void handleSave(WebSocketSession session, JsonNode payload) throws Exception {
+    /*private void handleSave(WebSocketSession session, JsonNode payload) throws Exception {
 
         System.err.println("save");
         // payload -> BoardPayloadDto へ変換
@@ -108,14 +125,14 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
         // redisに保存
         Board board = BoardMapper.toBoard(boardPayload.getBoard());
         redisService.save(board.getBoardId(),board);
-    }
+    }*/
 
     /**
      * 該当のboardIdのboardの状態を送る
      * @param session WebSocketセッション
      * @param payload リクエスト本体（boardId,boardの中身）
      */
-    private void handleGet(WebSocketSession session, JsonNode payload) throws Exception {
+    /*private void handleGet(WebSocketSession session, JsonNode payload) throws Exception {
         String boardId = payload.get("boardId").asText();
         String roomId = payload.get("roomId").asText();
 
@@ -137,8 +154,6 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
 
             session.sendMessage(new TextMessage(responseDTOJson));
         }
-    }
+    }*/
 
 }
-
-

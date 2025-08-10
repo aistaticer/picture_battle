@@ -8,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession;
 import com.example.app.service.RedisService;
 import com.example.app.webSocket.WebSocketBroadcaster;
 import com.example.app.webSocket.WebSocketCommandHandler;
+import com.example.app.webSocket.sessionManeger.SessionManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.app.model.Board;
@@ -18,11 +19,16 @@ import com.example.app.webSocket.WebSocketBroadcaster;
 import com.example.app.dto.BoardDTO;
 import com.example.app.dto.BoardPayloadDto;
 import com.example.app.dto.BoardResponseDTO;
+import com.example.app.dto.TileDTO;
 import com.example.app.mapper.BoardMapper;
+import com.example.app.entity.WebSocket;
+import com.example.app.webSocket.sessionManeger.SessionManager;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 
@@ -32,14 +38,18 @@ public class GameCommandHandler implements WebSocketCommandHandler {
     private final RedisService redisService;
     private final ObjectMapper objectMapper;
     private final WebSocketBroadcaster broadcaster;
+    private Map<String, TileDTO> tileMap = new HashMap<>();
+    private final Map<String, Map<String, TileDTO>> roomBoards = new ConcurrentHashMap<>();
+    private final SessionManager sessionManager;
 
     /**
      * RedisとObjectMapperを使ってBoardの保存や取得を行う。
      */
-    public GameCommandHandler(RedisService redisService, ObjectMapper objectMapper, WebSocketBroadcaster broadcaster) {
+    public GameCommandHandler(RedisService redisService, ObjectMapper objectMapper, WebSocketBroadcaster broadcaster, SessionManager sessionManager) {
         this.redisService = redisService;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
+        this.sessionManager = sessionManager;
     }
 
     /**
@@ -62,7 +72,7 @@ public class GameCommandHandler implements WebSocketCommandHandler {
         String actionTypeStr = actionType.asText();
 
         switch (actionTypeStr) {
-            case "start" -> handleStart(session, payload);
+            case "join" -> handleJoin(session, payload);
         }
     }
 
@@ -71,30 +81,35 @@ public class GameCommandHandler implements WebSocketCommandHandler {
      * @param session WebSocketセッション
      * @param payload リクエスト本体（boardId,boardの中身）
      */
-    private void handleStart(WebSocketSession session, JsonNode payload) throws Exception {
+    private void handleJoin(WebSocketSession session, JsonNode payload) throws Exception {
         String boardId = payload.get("boardId").asText();
         String roomId = payload.get("roomId").asText();
 
-        broadcaster.registerSession(roomId,session);
         broadcaster.printAllSessions();
 
-        // nullでも例外を出さないためにoptionalに格納
-        Optional<BoardDTO> optionalBoard = redisService.get(boardId);
+        System.err.println("payload: " + payload);
 
-        if (optionalBoard.isPresent()) {
+        BoardDTO boardDTO = redisService.getBoard(boardId);
 
-            BoardDTO boardDTO = optionalBoard.get();
+        // DTOを作成
+        BoardResponseDTO responseDTO = new BoardResponseDTO();
+        responseDTO.setType("game");
+        responseDTO.setAction("join");
 
-            // DTOを作成
-            BoardResponseDTO responseDTO = new BoardResponseDTO();
-            responseDTO.setType("game");
-            responseDTO.setAction("start");
-            responseDTO.setBoard(boardDTO);
+        // tobeのboard
+        responseDTO.setBoard(boardDTO);
 
-            String responseDTOJson = objectMapper.writeValueAsString(responseDTO);
+        String responseDTOJson = objectMapper.writeValueAsString(responseDTO);
 
-            session.sendMessage(new TextMessage(responseDTOJson));
-        }
+        // このやり方はオートスケーティングに対応できないからいつか変える
+        roomBoards.put(roomId, tileMap);
+
+        System.err.println(responseDTOJson);
+
+        // セッションをルームに割り当てる
+        sessionManager.assignToRoom(roomId, session);
+
+        session.sendMessage(new TextMessage(responseDTOJson));
     }
 
 }

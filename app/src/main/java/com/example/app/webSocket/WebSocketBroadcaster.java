@@ -8,14 +8,18 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.example.app.dto.BoardDTO;
 import com.example.app.dto.BoardResponseDTO;
+import com.example.app.dto.BroadcastTileDTO;
 import com.example.app.dto.TileDTO;
 import com.example.app.dto.TileResponseDTO;
 import com.example.app.dto.TileResponseDTO;
 import com.example.app.model.Board;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 import java.util.Set;
 import java.util.Map;
+import com.example.app.webSocket.sessionManeger.SessionManager;
 
 @Component
 public class WebSocketBroadcaster {
@@ -28,6 +32,12 @@ public class WebSocketBroadcaster {
 
 	private final Set<WebSocketSession> sessions = ConcurrentHashMap.newKeySet();
 
+	private final SessionManager sessionManager;
+
+	public WebSocketBroadcaster(SessionManager sessionManager) {
+		this.sessionManager = sessionManager;
+	}
+
 	/** 
 	 * ルームIDごとにセッションを登録＠
 	*/
@@ -35,7 +45,7 @@ public class WebSocketBroadcaster {
 		roomSessions
 			.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet())
 			.add(session);
-    
+	
     sessionToRoom.put(session.getId(), roomId);
 	}
 
@@ -54,27 +64,24 @@ public class WebSocketBroadcaster {
   }
 
 	// ルーム内のすべてのクライアントに送信
-	public void broadcastToRoom(String roomId, String senderId, Object data) {
-    System.err.println("broadcastToRoom");
-    System.err.println(data);
+	public void broadcastToRoom(String roomId, String senderId, BroadcastTileDTO data) {
+		Optional<Set<WebSocketSession>> sessions = sessionManager.getSessionsByRoomId(roomId);
 
-		Set<WebSocketSession> sessions = roomSessions.get(roomId);
-		if (sessions != null) {
-			for (WebSocketSession session : sessions) {
-				try {
-          String userId = (String) session.getAttributes().get("userId");
-          if(!userId.equals(senderId)){
+		if (sessions.isPresent()) {
+			for (WebSocketSession session : sessions.get()) {
+        String userId = (String) session.getAttributes().get("userId");
+        if(!userId.equals(senderId)){
 
-            TileResponseDTO tileResponseDTO = new TileResponseDTO();
-            tileResponseDTO.setType("server");
-            tileResponseDTO.setAction("send");
-            tileResponseDTO.setTileDTO((TileDTO)data);
-
-					  session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(tileResponseDTO)));
+					System.err.println("data: " + data);
+          // 同時実行の場合にスレッドが順番にmessageを送ってくれるようになる　動作を確認していないため後ほど確認
+          synchronized (session) {
+            try {
+              session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(data)));
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
           }
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+        }
 			}
 		}
 	}

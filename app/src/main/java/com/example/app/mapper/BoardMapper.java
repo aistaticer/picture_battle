@@ -4,13 +4,15 @@ import com.example.app.model.Board;
 import com.example.app.model.Tile;
 
 import java.util.stream.Collectors;
+import java.util.HashMap;
 import java.util.List;
+import java.util.*;
 
 import com.example.app.dto.BoardDTO;
 import com.example.app.dto.TileDTO;
 
 public class BoardMapper {
-    public static Board toBoard(BoardDTO dto) {
+    /*public static Board toBoard(BoardDTO dto) {
         Board board = new Board();
         board.setBoardId(dto.getBoardId());
 
@@ -38,5 +40,17 @@ public class BoardMapper {
 						
         dto.setTiles(tileDtoList);
         return dto;
-    }
+    }*/
+
+		/*public static Map<String, TileDTO> toTileMap(BoardDTO boardDTO) {
+        Map<String, TileDTO> map = new HashMap<>();
+        for (List<TileDTO> row : boardDTO.getTiles()) {
+            for (TileDTO tile : row) {
+                List<Integer> pos = tile.getPosition();
+                String key = pos.get(0) + "-" + pos.get(1) + "-" + pos.get(2);
+                map.put(key, tile);
+            }
+        }
+        return map;
+    }*/
 }
