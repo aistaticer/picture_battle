@@ -10,6 +10,5 @@ import java.util.*;
 @NoArgsConstructor
 public class BoardDTO {
 	private String boardId;
-	//private List<List<TileDTO>> tiles;
 	Map<String,TileDTO> tiles;
 }

@@ -55,11 +55,16 @@ public class EchoHandler extends TextWebSocketHandler {
         sessionManager.removeSession(session);
     }
 
+    /**
+     * WebSocket接続が確立された際に呼び出される。
+     * @param session WebSocketセッション
+     * @param message WebSocketメッセージ
+     */
 	@Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 
         try{
-            //System.err.println("内容確認: "+message.getPayload());
+            System.err.println("内容確認: "+message.getPayload());
 
             // クライアントから受信した WebSocket メッセージ（JSON形式）を Jackson の JsonNode にパースする
             JsonNode root = mapper.readTree(message.getPayload());

@@ -8,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession;
 import com.example.app.service.RedisService;
 import com.example.app.webSocket.WebSocketBroadcaster;
 import com.example.app.webSocket.WebSocketCommandHandler;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.app.model.Board;
@@ -74,27 +75,33 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
     }
 
     /**
-     * redisに送られてきたtileを同一ルームのユーザー等に送り、boardに再進化してredisに保存。
+     * redisに送られてきたtileを同一ルームのユーザー等に送り、boardに変更してredisに保存。
      * @param session WebSocketセッション
      * @param payload リクエスト本体（boardId,boardの中身）
      */
     private void handleupdateTile(WebSocketSession session, JsonNode payload) throws Exception {
         System.err.println("updateTile");
-        System.err.println(payload);
+        System.err.println("payload: " + payload);
         String roomId = payload.get("roomId").asText();
         String senderId = payload.get("senderId").asText();
         String boardId = payload.get("boardId").asText();
 
         System.err.println(redisService.getBoard(boardId));
 
-        JsonNode updateTileNode = payload.get("updateTile");
-        TileDTO tileDTO = objectMapper.treeToValue(updateTileNode, TileDTO.class);
+        JsonNode updateTilesNode = payload.get("updateTiles");
+        
+        // updateTilesNode → tiles 部分をDTOに変換
+        Map<String, TileDTO> tiles = objectMapper.convertValue(
+            updateTilesNode,
+            new TypeReference<Map<String, TileDTO>>() {}
+        );
 
-        System.err.println("payload");
-        System.err.println(payload);
+        BoardDTO updateTilesDTO = new BoardDTO(boardId, tiles);
 
         try {
-            redisService.updateTile(boardId, tileDTO);
+            //redisService.updateTile(boardId, tileDTO);
+            System.err.println("updateTilesDTO: " + updateTilesDTO);
+            redisService.updateTile(boardId, updateTilesDTO);
             redisTemplate.convertAndSend("board-updates", payload.toString());  
         } catch (Exception e) {
             e.printStackTrace();

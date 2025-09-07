@@ -42,12 +42,20 @@ public class RedisService {
 	/**
 	 * boardのtileを更新する
 	 * @param boardId
-	 * @param tileDTO
+	 * @param updateTilesDTO
 	 */
-	public void updateTile(String boardId, TileDTO tileDTO){
+	public void updateTile(String boardId, BoardDTO updateTilesDTO){
 		System.err.println("updateTile");
+
+		System.err.println("updateTilessssDTO: " + updateTilesDTO);
+		for (Map.Entry<String, TileDTO> entry : updateTilesDTO.getTiles().entrySet()) {
+			String key = entry.getKey();
+			TileDTO tileDTO = entry.getValue();
+			Tile tile = TileMapper.toTile(tileDTO);
+			redisTemplate.opsForHash().put(boardId, key, tile);
+		}
 		
-		Tile tile = TileMapper.toTile(tileDTO);
+		/*Tile tile = TileMapper.toTile(tileDTO);
 		
 		// positionからkeyを作成
 		List<Integer> position = tileDTO.getPosition();
@@ -56,6 +64,7 @@ public class RedisService {
 				.collect(Collectors.joining("-"));
 		
 		redisTemplate.opsForHash().put(boardId, key, tile);
+		*/
 	}
 
 	/**

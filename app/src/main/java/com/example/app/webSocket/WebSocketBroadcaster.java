@@ -63,7 +63,12 @@ public class WebSocketBroadcaster {
     }
   }
 
-	// ルーム内のすべてのクライアントに送信
+	/**
+	 * ルーム内のすべてのクライアントに送信
+	 * @param roomId ルームID
+	 * @param senderId 送信元のユーザーID
+	 * @param data 送信するデータ
+	*/
 	public void broadcastToRoom(String roomId, String senderId, BroadcastTileDTO data) {
 		Optional<Set<WebSocketSession>> sessions = sessionManager.getSessionsByRoomId(roomId);
 

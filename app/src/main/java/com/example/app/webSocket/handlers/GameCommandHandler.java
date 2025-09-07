@@ -95,6 +95,10 @@ public class GameCommandHandler implements WebSocketCommandHandler {
         BoardResponseDTO responseDTO = new BoardResponseDTO();
         responseDTO.setType("game");
         responseDTO.setAction("join");
+        
+        // 仮のgameGroupId。いつかDBからの取得に切り替える
+		String gameGroupId = "testGameGroupId";
+        responseDTO.setGameGroupId(gameGroupId);
 
         // tobeのboard
         responseDTO.setBoard(boardDTO);

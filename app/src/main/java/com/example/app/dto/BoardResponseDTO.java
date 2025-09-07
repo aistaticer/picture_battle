@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class BoardResponseDTO {
     private String type;
     private String action;
+    private String gameGroupId;
     private BoardDTO board;
 }

@@ -1,13 +1,19 @@
 package com.example.app.redis;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 
 import com.example.app.dto.BroadcastTileDTO;
+import com.example.app.dto.TileDTO;
 import com.example.app.webSocket.WebSocketBroadcaster;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 
 @Service
 public class RedisSubscriber implements MessageListener {
@@ -31,11 +37,27 @@ public class RedisSubscriber implements MessageListener {
         System.out.println("Received message: " + body + " from channel: " + channel);
 
         try {
-            // まず中身のJSON文字列を普通のJSONに戻す
-            String json = objectMapper.readValue(body, String.class);
+            // まず一回パースして中の文字列を取り出す
+            String innerJson = objectMapper.readValue(body, String.class);
+
+            // それをもう一度JsonNodeに変換
+            JsonNode root = objectMapper.readTree(innerJson);
+
+            // JSONをJsonNodeとして直接パース
+            JsonNode updateTilesNode = root.get("updateTiles");
+
+            // updateTilesNode → tiles 部分をDTOに変換
+            Map<String, TileDTO> updateTiles = objectMapper.convertValue(
+                updateTilesNode,
+                new TypeReference<Map<String, TileDTO>>() {}
+            );
 
             // それをDTOに変換
-            BroadcastTileDTO dto = objectMapper.readValue(json, BroadcastTileDTO.class);
+            BroadcastTileDTO dto = new BroadcastTileDTO();
+            dto.setUpdateTiles(updateTiles);
+
+            dto.setRoomId(root.get("roomId").asText());
+            dto.setSenderId(root.get("senderId").asText());
 
             dto.setType("server");
             dto.setAction("send");

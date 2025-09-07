@@ -1,5 +1,7 @@
 package com.example.app.dto;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -10,6 +12,5 @@ public class BroadcastTileDTO {
 	private String action;
 	private String roomId;
 	private String senderId;
-	@JsonProperty("updateTile")
-	private TileDTO tile;
+	private Map<String,TileDTO> updateTiles;
 }
