@@ -6,12 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.example.app.dto.BoardDTO;
-import com.example.app.dto.BoardResponseDTO;
 import com.example.app.dto.BroadcastTileDTO;
-import com.example.app.dto.TileDTO;
-import com.example.app.dto.TileResponseDTO;
-import com.example.app.dto.TileResponseDTO;
 import com.example.app.model.Board;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,11 +19,11 @@ import com.example.app.webSocket.sessionManeger.SessionManager;
 @Component
 public class WebSocketBroadcaster {
 
-  // roomId → Set<Session>
-	private final Map<String, Set<WebSocketSession>> roomSessions = new ConcurrentHashMap<>();
+  // gameId → Set<Session>
+	private final Map<String, Set<WebSocketSession>> gameSessions = new ConcurrentHashMap<>();
 
-  // sessionId → roomId
-  private final Map<String, String> sessionToRoom = new ConcurrentHashMap<>();
+  // sessionId → gameId
+  private final Map<String, String> sessionTogame = new ConcurrentHashMap<>();
 
 	private final Set<WebSocketSession> sessions = ConcurrentHashMap.newKeySet();
 
@@ -41,36 +36,36 @@ public class WebSocketBroadcaster {
 	/** 
 	 * ルームIDごとにセッションを登録＠
 	*/
-	public void registerSession(String roomId, WebSocketSession session) {
-		roomSessions
-			.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet())
+	public void registerSession(String gameId, WebSocketSession session) {
+		gameSessions
+			.computeIfAbsent(gameId, k -> ConcurrentHashMap.newKeySet())
 			.add(session);
 	
-    sessionToRoom.put(session.getId(), roomId);
+    sessionTogame.put(session.getId(), gameId);
 	}
 
 	// セッションをルームから削除
   public void removeSession(WebSocketSession session) {
-    String roomId = sessionToRoom.remove(session.getId());
-    if (roomId == null) return;
+    String gameId = sessionTogame.remove(session.getId());
+    if (gameId == null) return;
 
-    Set<WebSocketSession> sessions = roomSessions.get(roomId);
+    Set<WebSocketSession> sessions = gameSessions.get(gameId);
     if (sessions != null) {
       sessions.remove(session);
       if (sessions.isEmpty()) {
-        roomSessions.remove(roomId); // 空ならクリーンアップ
+        gameSessions.remove(gameId); // 空ならクリーンアップ
       }
     }
   }
 
 	/**
 	 * ルーム内のすべてのクライアントに送信
-	 * @param roomId ルームID
+	 * @param gameId ルームID
 	 * @param senderId 送信元のユーザーID
 	 * @param data 送信するデータ
 	*/
-	public void broadcastToRoom(String roomId, String senderId, BroadcastTileDTO data) {
-		Optional<Set<WebSocketSession>> sessions = sessionManager.getSessionsByRoomId(roomId);
+	public void broadcastTogame(String gameId, String senderId, BroadcastTileDTO data) {
+		Optional<Set<WebSocketSession>> sessions = sessionManager.getSessionsBygameId(gameId);
 
 		if (sessions.isPresent()) {
 			for (WebSocketSession session : sessions.get()) {
@@ -100,11 +95,11 @@ public class WebSocketBroadcaster {
 	 * 仮のメソッド。いつか消す
 	**/
 	public void printAllSessions() {
-		for (Map.Entry<String, Set<WebSocketSession>> entry : roomSessions.entrySet()) {
-			String roomId = entry.getKey();
+		for (Map.Entry<String, Set<WebSocketSession>> entry : gameSessions.entrySet()) {
+			String gameId = entry.getKey();
 			Set<WebSocketSession> sessions = entry.getValue();
 
-			System.out.println("ルームID: " + roomId);
+			System.out.println("ルームID: " + gameId);
 			for (WebSocketSession session : sessions) {
 				System.out.println("  セッションID: " + session.getId());
 			}

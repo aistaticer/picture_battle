@@ -13,7 +13,7 @@ public class WebsocketHandshakeInterceptor implements HandshakeInterceptor {
 	    @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        // 例: クエリパラメータからroomId取得
+        // 例: クエリパラメータからgameId取得
         if (request instanceof ServletServerHttpRequest servletRequest) {
             String userId = servletRequest.getServletRequest().getParameter("userId");
             attributes.put("userId", userId);

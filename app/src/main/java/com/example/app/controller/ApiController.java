@@ -2,21 +2,26 @@ package com.example.app.controller;
 
 import com.example.app.util.RSAKeyGenerator;
 import com.example.app.webSocket.WebSocketBroadcaster;
-import com.example.app.service.GameService;
+import com.example.app.service.BoardGameService;
 import com.example.app.service.QuizService;
 import com.example.app.dto.BoardState;
 import com.example.app.dto.CheckAnswerRequest;
 import com.example.app.dto.sendThemeResponse;
+import com.example.app.entity.Game;
+import com.example.app.entity.Team;
 import com.example.app.dto.CheckAnswerRequest;
 import com.example.app.dto.Reward;
 import com.example.app.service.RedisService;
 import com.example.app.service.UserService;
 import com.example.app.mapper.BoardMapper;
 import com.example.app.model.Board;
-import com.example.app.repository.UserRepository;
+import com.example.app.repository.jpa.GameRepository;
+import com.example.app.repository.jpa.TeamRepository;
+import com.example.app.repository.jpa.UserRepository;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -46,17 +51,20 @@ public class ApiController {
 
     RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator();
     QuizService quizService = new QuizService();
-    GameService gameService = new GameService();
+    BoardGameService gameService = new BoardGameService();
     
     private final RedisService redisService;
     private final WebSocketBroadcaster webSocketBroadcaster;
     private final UserService userService;
+    private final GameRepository gameRepository;
+    private final TeamRepository teamRepository;
 
-
-    public ApiController(RedisService redisService,WebSocketBroadcaster webSocketBroadcaster, UserService userService) {
+    public ApiController(RedisService redisService,WebSocketBroadcaster webSocketBroadcaster, UserService userService, GameRepository gameRepository, TeamRepository teamRepository) {
         this.redisService = redisService;
         this.webSocketBroadcaster = webSocketBroadcaster;
         this.userService = userService;
+        this.gameRepository = gameRepository;
+        this.teamRepository = teamRepository;
     }
 
     @PostMapping("/data")
@@ -108,37 +116,25 @@ public class ApiController {
     @PostMapping("/startGame")
     public ResponseEntity<Map<String, String>> startGame(@RequestBody Map<String, String> body) {
 
-        /*String token = body.get("token");
-        String roomId = "1";//UUID.randomUUID().toString(); // 仮に新規ルーム生成
+        String userId = body.get("userId");
+        String gameId = body.get("gameId");
 
-        Board board = BoardMapper.toBoard(gameService.getInitialBoard(3));
+        List<Team> teams = teamRepository.findByGameId(UUID.fromString(gameId));
 
-        redisService.save("1",board);*/
-
-        // ここから確認よう
-
-        String roomId = "1";//UUID.randomUUID().toString(); // 仮に新規ルーム生成
-
-        Board board = gameService.getInitialBoard(5);
+        Board board = gameService.getInitialBoard(7,teams);
 
         redisService.saveBoard("board1",board);
 
-        redisService.getBoard("board1");
+        System.out.println(redisService.getBoard("board1"));
 
-        System.err.println(redisService.getBoard("board1"));
-
-        // ここまで
-
-        // ここでルームへの参加処理を行う（セッション保存など）
-
-        //webSocketBroadcaster.broadcastToRoom("1","データ送ります");
+        //webSocketBroadcaster.broadcastTogame("1","データ送ります");
         webSocketBroadcaster.printAllSessions();
 
-        // DBに仮登録したroom_idを使用　いつか変える
-        UUID room_Id = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-        userService.registerUser(room_Id,"taro");
+        // DBに仮登録したgame_idを使用　いつか変える
+        UUID game_Id = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        //userService.registerUser(game_Id,"taro");
 
-        return ResponseEntity.ok(Map.of("roomId", roomId));
+        return ResponseEntity.ok(Map.of("gameId", gameId));
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.example.app.webSocket.handlers;
 
 import org.springframework.web.socket.WebSocketSession;
+
+import com.example.app.context.DispatchContext;
 import com.example.app.webSocket.WebSocketCommandHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,16 +17,16 @@ public class NotifyCommandHandlar implements WebSocketCommandHandler {
 	}
 	
 	@Override
-	public void handle(WebSocketSession session, JsonNode actionType, JsonNode payload) throws Exception {
-		String actionTypeStr = actionType.asText();	
+	public void handle(WebSocketSession session, DispatchContext dispatchContext) throws Exception {
+		String actionType = dispatchContext.getActionType();	
 		
-		switch (actionTypeStr) {
-			case "join" -> handleTileNotify(session, payload);
+		switch (actionType) {
+			case "join" -> handleTileNotify(session, dispatchContext.getPayload());
 		}
 	}
 	
 	private void handleTileNotify(WebSocketSession session, JsonNode payload) throws Exception {
-		String roomId = payload.get("roomId").asText();
+		String gameId = payload.get("gameId").asText();
 		String senderId = payload.get("senderId").asText();
 		String boardId = payload.get("boardId").asText();
 		

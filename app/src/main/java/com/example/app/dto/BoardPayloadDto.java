@@ -9,7 +9,7 @@ import com.example.app.model.Board;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardPayloadDto {
-	private String roomId;
+	private String gameId;
 	private String senderId;
 	private BoardDTO board;	
 }

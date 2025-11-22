@@ -5,9 +5,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.example.app.entity.UserEntity;
-
-import com.example.app.repository.UserRepository;
+import com.example.app.entity.User;
+import com.example.app.repository.jpa.UserRepository;
 
 @Service
 public class UserService {
@@ -17,12 +16,11 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-		public UserEntity registerUser(UUID room_id, String name){
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-        UserEntity user = new UserEntity();
-				user.setId(userId);
-        user.setRoom_id(room_id);
-        user.setName(name);
-        return userRepository.save(user);
+    public User getUserById(String id){
+        return userRepository.findById(UUID.fromString(id)).orElse(null);
+    }
+
+    public String getTeamNameByUserId(UUID userId) {
+        return userRepository.findTeamNameByUserId(userId);
     }
 }

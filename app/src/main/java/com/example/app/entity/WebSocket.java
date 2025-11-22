@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class WebSocket {
 	String id;
 	String instance_id;
-	String room_id;
+	String game_id;
 	String user_id;
 }

@@ -34,6 +34,9 @@ public class RedisService {
 	}
 
 	public void saveBoard(String boardId, Board board){
+		// 既存の boardId のデータを削除
+		redisTemplate.delete(boardId);
+		
 		for (Map.Entry<String, Tile> entry : board.getTiles().entrySet()) {
     	redisTemplate.opsForHash().put(boardId, entry.getKey(), entry.getValue());
 		}

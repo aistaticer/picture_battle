@@ -12,38 +12,38 @@ import org.springframework.web.socket.WebSocketSession;
 @Component
 public class SessionManager {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final Map<String, Set<WebSocketSession>> roomSessions = new ConcurrentHashMap<>();
-    private final Map<String, String> sessionIdToRoomId = new ConcurrentHashMap<>();
+    private final Map<String, Set<WebSocketSession>> gameSessions = new ConcurrentHashMap<>();
+    private final Map<String, String> sessionIdTogameId = new ConcurrentHashMap<>();
 
     public void addSession(WebSocketSession session) {
         sessions.put(session.getId(), session);
     }
 
 
-    public void assignToRoom(String roomId, WebSocketSession session) {
-        roomSessions.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet())
+    public void assignTogame(String gameId, WebSocketSession session) {
+        gameSessions.computeIfAbsent(gameId, k -> ConcurrentHashMap.newKeySet())
                     .add(session);
-        sessionIdToRoomId.put(session.getId(), roomId);
+        sessionIdTogameId.put(session.getId(), gameId);
     }
 
-    public void removeFromRoom(String roomId, WebSocketSession session) {
-        Set<WebSocketSession> sessions = roomSessions.get(roomId);
+    public void removeFromgame(String gameId, WebSocketSession session) {
+        Set<WebSocketSession> sessions = gameSessions.get(gameId);
         if (sessions != null) {
             sessions.remove(session);
             // ルームが空になった場合はルーム自体を削除
             if (sessions.isEmpty()) {
-                roomSessions.remove(roomId);
+                gameSessions.remove(gameId);
             }
         }
-        sessionIdToRoomId.remove(session.getId());
+        sessionIdTogameId.remove(session.getId());
     }
 
     public void removeSession(WebSocketSession session) {
         sessions.remove(session.getId());
         // セッションが削除される際は、ルームからも削除
-        String roomId = sessionIdToRoomId.remove(session.getId());
-        if (roomId != null) {
-            removeFromRoom(roomId, session);
+        String gameId = sessionIdTogameId.remove(session.getId());
+        if (gameId != null) {
+            removeFromgame(gameId, session);
         }
     }
 
@@ -55,8 +55,8 @@ public class SessionManager {
         return sessions.values();
     }
 
-    public Optional<Set<WebSocketSession>> getSessionsByRoomId(String roomId) {
-        Set<WebSocketSession> sessions = roomSessions.get(roomId);
+    public Optional<Set<WebSocketSession>> getSessionsBygameId(String gameId) {
+        Set<WebSocketSession> sessions = gameSessions.get(gameId);
         if (sessions == null) {
             return Optional.empty();
         }
@@ -64,11 +64,11 @@ public class SessionManager {
     }
     
 
-    public Optional<String> getRoomIdBySessionId(String sessionId) {
-        return Optional.ofNullable(sessionIdToRoomId.get(sessionId));
+    public Optional<String> getGameIdBySessionId(String sessionId) {
+        return Optional.ofNullable(sessionIdTogameId.get(sessionId));
     }
 
-    public Optional<String> getRoomIdBySession(WebSocketSession session) {
-        return getRoomIdBySessionId(session.getId());
+    public Optional<String> getGameIdBySession(WebSocketSession session) {
+        return getGameIdBySessionId(session.getId());
     }
 }

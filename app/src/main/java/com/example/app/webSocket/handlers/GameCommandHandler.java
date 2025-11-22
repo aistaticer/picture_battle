@@ -4,6 +4,7 @@ package com.example.app.webSocket.handlers;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.example.app.service.GameService;
 //import com.example.app.dto.Board;
 import com.example.app.service.RedisService;
 import com.example.app.webSocket.WebSocketBroadcaster;
@@ -14,20 +15,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.app.model.Board;
 import com.example.app.model.Tile;
 import com.example.app.model.ex;
+import com.example.app.repository.jpa.TeamRepository;
 import com.example.app.service.RedisService;
 import com.example.app.webSocket.WebSocketBroadcaster;
+import com.example.app.context.DispatchContext;
 import com.example.app.dto.BoardDTO;
 import com.example.app.dto.BoardPayloadDto;
 import com.example.app.dto.BoardResponseDTO;
 import com.example.app.dto.TileDTO;
 import com.example.app.mapper.BoardMapper;
+import com.example.app.entity.Game;
+import com.example.app.entity.Team;
+import com.example.app.entity.User;
 import com.example.app.entity.WebSocket;
 import com.example.app.webSocket.sessionManeger.SessionManager;
+import com.example.app.service.UserService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
@@ -39,17 +47,23 @@ public class GameCommandHandler implements WebSocketCommandHandler {
     private final ObjectMapper objectMapper;
     private final WebSocketBroadcaster broadcaster;
     private Map<String, TileDTO> tileMap = new HashMap<>();
-    private final Map<String, Map<String, TileDTO>> roomBoards = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, TileDTO>> gameBoards = new ConcurrentHashMap<>();
     private final SessionManager sessionManager;
+    private final UserService userService;
+    private final GameService gameService;
+    private final TeamRepository teamRepository;
 
     /**
      * RedisとObjectMapperを使ってBoardの保存や取得を行う。
      */
-    public GameCommandHandler(RedisService redisService, ObjectMapper objectMapper, WebSocketBroadcaster broadcaster, SessionManager sessionManager) {
+    public GameCommandHandler(RedisService redisService, ObjectMapper objectMapper, WebSocketBroadcaster broadcaster, SessionManager sessionManager, UserService userService, GameService gameService, TeamRepository teamRepository) {
         this.redisService = redisService;
         this.objectMapper = objectMapper;
         this.broadcaster = broadcaster;
         this.sessionManager = sessionManager;
+        this.userService = userService;
+        this.gameService = gameService;
+        this.teamRepository = teamRepository;
     }
 
     /**
@@ -68,11 +82,11 @@ public class GameCommandHandler implements WebSocketCommandHandler {
      * @param payload リクエスト本体
      */
     @Override
-    public void handle(WebSocketSession session, JsonNode actionType, JsonNode payload) throws Exception {
-        String actionTypeStr = actionType.asText();
+    public void handle(WebSocketSession session, DispatchContext dispatchContext) throws Exception {
+        String actionType = dispatchContext.getActionType();
 
-        switch (actionTypeStr) {
-            case "join" -> handleJoin(session, payload);
+        switch (actionType) {
+            case "join" -> handleJoin(session, dispatchContext.getPayload());
         }
     }
 
@@ -83,7 +97,7 @@ public class GameCommandHandler implements WebSocketCommandHandler {
      */
     private void handleJoin(WebSocketSession session, JsonNode payload) throws Exception {
         String boardId = payload.get("boardId").asText();
-        String roomId = payload.get("roomId").asText();
+        String gameId = payload.get("gameId").asText();
 
         broadcaster.printAllSessions();
 
@@ -96,9 +110,19 @@ public class GameCommandHandler implements WebSocketCommandHandler {
         responseDTO.setType("game");
         responseDTO.setAction("join");
         
-        // 仮のgameGroupId。いつかDBからの取得に切り替える
-		String gameGroupId = "testGameGroupId";
-        responseDTO.setGameGroupId(gameGroupId);
+
+        // userIdをUUIDに変換してUserを取得
+        User user = userService.getUserById(payload.get("userId").asText());   
+        
+        // クライアントから渡されたuserIdをUUIDに変換してチーム名を取得
+        String myTeamName = userService.getTeamNameByUserId(user.getId());
+        // セッションにチーム名を保存。都度DBに接続しなくて済むようにしている
+        session.getAttributes().put("myTeamName", myTeamName);
+        // 今回はすでに取得したチーム名をそのまま使用する
+        responseDTO.setMyTeamName(myTeamName);
+
+        List<String> teamNames = teamRepository.findTeamNamesByGameId(UUID.fromString(gameId));
+        responseDTO.setTeamNames(teamNames);
 
         // tobeのboard
         responseDTO.setBoard(boardDTO);
@@ -106,12 +130,12 @@ public class GameCommandHandler implements WebSocketCommandHandler {
         String responseDTOJson = objectMapper.writeValueAsString(responseDTO);
 
         // このやり方はオートスケーティングに対応できないからいつか変える
-        roomBoards.put(roomId, tileMap);
+        gameBoards.put(gameId, tileMap);
 
         System.err.println(responseDTOJson);
 
         // セッションをルームに割り当てる
-        sessionManager.assignToRoom(roomId, session);
+        sessionManager.assignTogame(gameId, session);
 
         session.sendMessage(new TextMessage(responseDTOJson));
     }

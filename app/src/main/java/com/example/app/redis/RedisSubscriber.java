@@ -56,7 +56,7 @@ public class RedisSubscriber implements MessageListener {
             BroadcastTileDTO dto = new BroadcastTileDTO();
             dto.setUpdateTiles(updateTiles);
 
-            dto.setRoomId(root.get("roomId").asText());
+            dto.setGameId(root.get("gameId").asText());
             dto.setSenderId(root.get("senderId").asText());
 
             dto.setType("server");
@@ -64,7 +64,7 @@ public class RedisSubscriber implements MessageListener {
             System.out.println("変換結果: " + dto);
 
             // ここで WebSocket 経由で他のクライアントに送信したりできる
-            broadcaster.broadcastToRoom(dto.getRoomId(), dto.getSenderId(), dto);
+            broadcaster.broadcastTogame(dto.getGameId(), dto.getSenderId(), dto);
         } catch (Exception e) {
             e.printStackTrace();
         }

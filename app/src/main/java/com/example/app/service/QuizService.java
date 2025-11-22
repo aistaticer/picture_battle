@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class QuizService {
 
 	FileOperations fileOperations = new FileOperations();

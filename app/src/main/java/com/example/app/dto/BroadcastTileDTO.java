@@ -10,7 +10,7 @@ import lombok.Data;
 public class BroadcastTileDTO {
 	private String type;
 	private String action;
-	private String roomId;
+	private String gameId;
 	private String senderId;
 	private Map<String,TileDTO> updateTiles;
 }

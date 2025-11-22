@@ -21,6 +21,7 @@ import com.example.app.dto.BoardResponseDTO;
 import com.example.app.dto.TileDTO;
 import com.example.app.mapper.BoardMapper;
 import com.example.app.mapper.TileMapper;
+import com.example.app.context.DispatchContext;
 import com.example.app.dto.BoardDTO;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -64,13 +65,13 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
      * @param payload リクエスト本体
      */
     @Override
-    public void handle(WebSocketSession session, JsonNode actionType, JsonNode payload) throws Exception {
-        String actionTypeStr = actionType.asText();
+    public void handle(WebSocketSession session, DispatchContext dispatchContext) throws Exception {
+        String actionType = dispatchContext.getActionType();
 
-        switch (actionTypeStr) {
+        switch (actionType) {
             //case "save" -> handleSave(session, payload);
             //case "get" -> handleGet(session, payload);
-            case "updateTile" -> handleupdateTile(session, payload);
+            case "updateTile" -> handleupdateTile(session, dispatchContext.getPayload());
         }
     }
 
@@ -82,11 +83,9 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
     private void handleupdateTile(WebSocketSession session, JsonNode payload) throws Exception {
         System.err.println("updateTile");
         System.err.println("payload: " + payload);
-        String roomId = payload.get("roomId").asText();
+        String gameId = payload.get("gameId").asText();
         String senderId = payload.get("senderId").asText();
         String boardId = payload.get("boardId").asText();
-
-        System.err.println(redisService.getBoard(boardId));
 
         JsonNode updateTilesNode = payload.get("updateTiles");
         
@@ -106,61 +105,6 @@ public class BoardCommandHandler implements WebSocketCommandHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //broadcaster.broadcastToRoom(roomId,senderId,boardMap);
+        //broadcaster.broadcastTogame(gameId,senderId,boardMap);
     }
-
-    /**
-     * redisに送られてきたデータを保存する。
-     * @param session WebSocketセッション
-     * @param payload リクエスト本体（boardId,boardの中身）
-     */
-    /*private void handleSave(WebSocketSession session, JsonNode payload) throws Exception {
-
-        System.err.println("save");
-        // payload -> BoardPayloadDto へ変換
-        BoardPayloadDto boardPayload = objectMapper.treeToValue(payload, BoardPayloadDto.class);
-
-        String roomId = boardPayload.getRoomId();
-
-        BoardDTO boardDTO = boardPayload.getBoard();
-
-        String senderId = boardPayload.getSenderId();
-        System.out.println("senderId = " + senderId);
-
-        broadcaster.broadcastToRoom(roomId,senderId,boardDTO);
-
-        // redisに保存
-        Board board = BoardMapper.toBoard(boardPayload.getBoard());
-        redisService.save(board.getBoardId(),board);
-    }*/
-
-    /**
-     * 該当のboardIdのboardの状態を送る
-     * @param session WebSocketセッション
-     * @param payload リクエスト本体（boardId,boardの中身）
-     */
-    /*private void handleGet(WebSocketSession session, JsonNode payload) throws Exception {
-        String boardId = payload.get("boardId").asText();
-        String roomId = payload.get("roomId").asText();
-
-        // nullでも例外を出さないためにoptionalに格納
-        Optional<BoardDTO> optionalBoard = redisService.get(boardId);
-
-        System.err.println(redisService.get(boardId));
-
-        if (optionalBoard.isPresent()) {
-            BoardDTO boardDTO = optionalBoard.get();
-
-            // DTOを作成
-            BoardResponseDTO responseDTO = new BoardResponseDTO();
-            responseDTO.setType("board");
-            responseDTO.setAction("game");
-            responseDTO.setBoard(boardDTO);
-
-            String responseDTOJson = objectMapper.writeValueAsString(responseDTO);
-
-            session.sendMessage(new TextMessage(responseDTOJson));
-        }
-    }*/
-
 }

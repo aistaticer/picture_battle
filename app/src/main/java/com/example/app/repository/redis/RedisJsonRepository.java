@@ -1,3 +1,4 @@
+package com.example.app.repository.redis;
 /*package com.example.app.repository;
 
 import com.example.app.model.Board;

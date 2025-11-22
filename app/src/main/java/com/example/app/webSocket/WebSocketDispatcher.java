@@ -8,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.example.app.context.DispatchContext;
 
 @Component
 public class WebSocketDispatcher {
@@ -20,12 +21,12 @@ public class WebSocketDispatcher {
 			}
     }
 
-    public void dispatch(String type, WebSocketSession session, JsonNode actionType, JsonNode payload) throws Exception {
-			WebSocketCommandHandler handler = handlerMap.get(type);
-			if (handler != null) {
-				handler.handle(session, actionType,payload);
+    public void dispatch(DispatchContext dispatchContext) throws Exception {
+			WebSocketCommandHandler handler = handlerMap.get(dispatchContext.getType());
+			if (handler != null) {	
+				handler.handle(dispatchContext.getSession(), dispatchContext);
 			} else {
-				session.sendMessage(new TextMessage("{\"error\": \"Unknown command\"}"));
+				dispatchContext.getSession().sendMessage(new TextMessage("{\"error\": \"Unknown command\"}"));
 			}
     }
 }
