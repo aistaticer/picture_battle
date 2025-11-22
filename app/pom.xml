@@ -39,6 +39,14 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+
+    <!-- Flyway -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+			<version>11.10.4</version> <!-- 最新版を指定 -->
+		</dependency>
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -50,6 +58,30 @@
 			<scope>test</scope>
 		</dependency>
 
+	  <!-- Redis操作ライブラリ（Spring Data Redis） -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- JSONシリアライズ用（オブジェクト→文字列） -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<!-- Redis接続クライアント：Lettuce（spring-boot-starter-data-redis に含まれているが、明示的に指定してもOK） -->
+		<dependency>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+		</dependency>
+
+		<!--websocketのため-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
 		<!--コード変更即時反映のため-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -58,7 +90,14 @@
 			<optional>true</optional>
     </dependency>
 
-		
+		<!--DTOを簡単に書くため-->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

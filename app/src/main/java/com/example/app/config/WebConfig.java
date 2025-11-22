@@ -1,4 +1,4 @@
-package com.example.config;
+package com.example.app.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -13,6 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
+				System.out.println("✅ WebConfig読み込み完了");
     }
 }
 

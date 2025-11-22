@@ -1,0 +1,74 @@
+package com.example.app.webSocket.sessionManeger;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
+
+/**
+ * WebSocketセッションを管理するクラス
+ */
+@Component
+public class SessionManager {
+    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, Set<WebSocketSession>> gameSessions = new ConcurrentHashMap<>();
+    private final Map<String, String> sessionIdTogameId = new ConcurrentHashMap<>();
+
+    public void addSession(WebSocketSession session) {
+        sessions.put(session.getId(), session);
+    }
+
+
+    public void assignTogame(String gameId, WebSocketSession session) {
+        gameSessions.computeIfAbsent(gameId, k -> ConcurrentHashMap.newKeySet())
+                    .add(session);
+        sessionIdTogameId.put(session.getId(), gameId);
+    }
+
+    public void removeFromgame(String gameId, WebSocketSession session) {
+        Set<WebSocketSession> sessions = gameSessions.get(gameId);
+        if (sessions != null) {
+            sessions.remove(session);
+            // ルームが空になった場合はルーム自体を削除
+            if (sessions.isEmpty()) {
+                gameSessions.remove(gameId);
+            }
+        }
+        sessionIdTogameId.remove(session.getId());
+    }
+
+    public void removeSession(WebSocketSession session) {
+        sessions.remove(session.getId());
+        // セッションが削除される際は、ルームからも削除
+        String gameId = sessionIdTogameId.remove(session.getId());
+        if (gameId != null) {
+            removeFromgame(gameId, session);
+        }
+    }
+
+    public Optional<WebSocketSession> getSession(String sessionId) {
+        return Optional.ofNullable(sessions.get(sessionId));
+    }
+
+    public Collection<WebSocketSession> getAllSessions() {
+        return sessions.values();
+    }
+
+    public Optional<Set<WebSocketSession>> getSessionsBygameId(String gameId) {
+        Set<WebSocketSession> sessions = gameSessions.get(gameId);
+        if (sessions == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Collections.unmodifiableSet(sessions)); // 変更不可セットで返す場合
+    }
+    
+
+    public Optional<String> getGameIdBySessionId(String sessionId) {
+        return Optional.ofNullable(sessionIdTogameId.get(sessionId));
+    }
+
+    public Optional<String> getGameIdBySession(WebSocketSession session) {
+        return getGameIdBySessionId(session.getId());
+    }
+}

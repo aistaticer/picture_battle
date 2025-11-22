@@ -2,7 +2,11 @@ package com.example.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
+@EnableJpaRepositories(basePackages = "com.example.app.repository.jpa")
+@EnableRedisRepositories(basePackages = "com.example.app.repository.redis")
 @SpringBootApplication
 public class DemoApplication {
 
